@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MindGear">
+<meta name="theme-color" content="#0a0b14">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>MindGear</title>
+<style>
+  :root{
+    --bg:#0a0b14;
+    --bg-2:#0e1020;
+    --card: rgba(255,255,255,0.045);
+    --card-solid:#161829;
+    --card-2: rgba(255,255,255,0.07);
+    --border: rgba(255,255,255,0.09);
+    --border-soft: rgba(255,255,255,0.055);
+    --violet:#a78bfa;
+    --violet-deep:#7c3aed;
+    --cyan:#22d3ee;
+    --gold:#fbbf24;
+    --success:#34d399;
+    --danger:#fb7185;
+    --text:#f3f2fa;
+    --text-dim:#9a9cb5;
+    --text-faint:#5f6180;
+    --f-display:Georgia,'Iowan Old Style','Palatino Linotype',Palatino,'Times New Roman',serif;
+    --f-body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --f-mono:'SF Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--f-body);
+    min-height:100vh;
+    padding-bottom:100px;
+    position:relative;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--violet); color:#0a0b14;}
+  h1,h2,h3{font-family:var(--f-display); margin:0;}
+
+  /* ---- Aurora background ---- */
+  .aurora{position:fixed; border-radius:50%; filter:blur(90px); pointer-events:none; z-index:0; opacity:.55;}
+  .aurora-1{width:380px; height:380px; top:-140px; left:-100px; background:radial-gradient(circle, var(--violet-deep), transparent 70%); animation:drift1 22s ease-in-out infinite alternate;}
+  .aurora-2{width:340px; height:340px; top:220px; right:-140px; background:radial-gradient(circle, var(--cyan), transparent 70%); opacity:.32; animation:drift2 26s ease-in-out infinite alternate;}
+  .aurora-3{width:300px; height:300px; bottom:60px; left:-90px; background:radial-gradient(circle, #f472b6, transparent 70%); opacity:.18; animation:drift1 30s ease-in-out infinite alternate-reverse;}
+  @keyframes drift1{ from{transform:translate(0,0) scale(1);} to{transform:translate(30px,40px) scale(1.15);} }
+  @keyframes drift2{ from{transform:translate(0,0) scale(1);} to{transform:translate(-25px,-30px) scale(1.1);} }
+  @media (prefers-reduced-motion: reduce){ .aurora{animation:none !important;} }
+
+  #app, .nav{position:relative; z-index:1;}
+  .wrap{max-width:560px; margin:0 auto; padding:20px 16px 8px;}
+
+  /* ---- Header / stamp ---- */
+  .home-header{padding:34px 16px 10px; position:relative; z-index:1;}
+  .brandmark{
+    font-family:var(--f-mono); font-size:11px; letter-spacing:4px; font-weight:600;
+    color:var(--cyan); opacity:.75; margin-bottom:6px; text-transform:uppercase;
+  }
+  .greeting{
+    font-family:var(--f-display); font-weight:400; font-size:36px; letter-spacing:.2px;
+    background:linear-gradient(100deg, #ffffff 15%, var(--violet) 55%, var(--cyan) 90%);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:var(--violet);
+  }
+  .greeting em{font-style:italic;}
+  .tagline{font-size:13px; color:var(--text-dim); margin-top:8px; letter-spacing:.4px;}
+  .stamp{
+    display:inline-block; margin-top:12px;
+    font-family:var(--f-mono); font-size:11px; letter-spacing:1.8px;
+    color:var(--cyan); background:var(--card); border:1px solid var(--border);
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    border-radius:20px; padding:6px 14px;
+    text-transform:uppercase;
+  }
+  .divider{height:1px; background:linear-gradient(90deg,var(--violet-deep),transparent 70%); margin:18px 0; opacity:.5;}
+
+  /* ---- Section headers ---- */
+  .section-title{
+    font-family:var(--f-display); font-style:italic; font-size:16px; letter-spacing:.4px;
+    color:var(--text); margin:26px 0 12px; display:flex; align-items:center; gap:9px;
+  }
+  .section-title:first-child{margin-top:0;}
+  .section-title::before{content:''; width:16px; height:2px; border-radius:2px; background:linear-gradient(90deg,var(--violet),var(--cyan));}
+  .subhead{font-size:12.5px; color:var(--text-faint); margin:-6px 0 14px; letter-spacing:.2px;}
+
+  /* ---- Cards (glass) ---- */
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:18px;
+    padding:15px; margin-bottom:12px;
+    backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+    box-shadow:0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+  .empty-note{
+    color:var(--text-faint); font-size:13px; font-style:italic; padding:14px 4px; text-align:center;
+  }
+
+  /* ---- Checklist rows ---- */
+  .row{display:flex; align-items:flex-start; gap:11px; padding:10px 2px; border-bottom:1px solid var(--border-soft);}
+  .row:last-child{border-bottom:none;}
+  .check{
+    width:22px; height:22px; border-radius:7px; border:1.5px solid rgba(167,139,250,0.5);
+    background:rgba(255,255,255,0.02);
+    flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:.2s;
+  }
+  .check.done{background:linear-gradient(135deg,var(--violet),var(--cyan)); border-color:transparent; box-shadow:0 0 14px -2px rgba(167,139,250,0.7);}
+  .check.done::after{content:'✓'; color:#0a0b14; font-size:13px; font-weight:700;}
+  .row-text{flex:1; font-size:14.5px; line-height:1.4;}
+  .row-text.done{color:var(--text-faint); text-decoration:line-through;}
+  .row-sub{font-size:11.5px; color:var(--text-faint); margin-top:3px; font-family:var(--f-mono);}
+  .row-del{color:var(--danger); font-size:13px; cursor:pointer; padding:4px 7px; flex-shrink:0; opacity:.75; border-radius:6px;}
+  .row-del:active{background:rgba(251,113,133,0.15);}
+
+  /* ---- Home tiles ---- */
+  .tile{
+    background:linear-gradient(135deg, rgba(167,139,250,0.09), rgba(34,211,238,0.05));
+    border:1px solid var(--border); border-left:3px solid var(--violet);
+    border-radius:14px; padding:14px 15px; margin-bottom:11px;
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  }
+  .tile-label{font-size:10.5px; letter-spacing:1.6px; text-transform:uppercase; color:var(--cyan); font-family:var(--f-mono); display:flex; align-items:center; gap:6px;}
+  .tile-label::before{content:''; width:6px; height:6px; border-radius:50%; background:var(--cyan); box-shadow:0 0 8px 1px var(--cyan); flex-shrink:0;}
+  .tile-body{font-size:15.5px; margin-top:6px; line-height:1.4; font-weight:500;}
+  .tile-meta{font-size:12px; color:var(--text-dim); margin-top:5px; font-family:var(--f-mono);}
+
+  /* ---- Finance ---- */
+  .fin-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px; margin-bottom:16px;}
+  .fin-box{
+    background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px 8px; text-align:center;
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  }
+  .fin-box .v{font-family:var(--f-mono); font-size:17px; font-weight:700;}
+  .fin-box .l{font-size:9.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:1.2px; margin-top:4px;}
+  .fin-box.have{border-color:rgba(251,191,36,0.35);}
+  .fin-box.have .v{color:var(--gold); text-shadow:0 0 16px rgba(251,191,36,0.35);}
+  .fin-box.recv{border-color:rgba(52,211,153,0.35);}
+  .fin-box.recv .v{color:var(--success); text-shadow:0 0 16px rgba(52,211,153,0.35);}
+  .fin-box.paid{border-color:rgba(251,113,133,0.35);}
+  .fin-box.paid .v{color:var(--danger); text-shadow:0 0 16px rgba(251,113,133,0.35);}
+
+  table.ledger{width:100%; border-collapse:collapse; font-size:12.5px;}
+  table.ledger th{text-align:left; color:var(--text-faint); font-weight:600; font-size:10px; text-transform:uppercase; letter-spacing:.8px; padding:7px 4px; border-bottom:1px solid var(--border);}
+  table.ledger td{padding:9px 4px; border-bottom:1px solid var(--border-soft); font-family:var(--f-mono);}
+  table.ledger tr:last-child td{border-bottom:none;}
+
+  /* ---- Buttons / forms ---- */
+  .btn{
+    background:var(--card); border:1px solid var(--border); color:var(--violet);
+    border-radius:12px; padding:12px 14px; font-size:13.5px; font-family:var(--f-body); font-weight:500;
+    cursor:pointer; width:100%; margin-top:6px;
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  }
+  .btn:active{background:var(--card-2); transform:scale(.985);}
+  .btn-solid{
+    background:linear-gradient(135deg,var(--violet-deep),var(--cyan)); color:#0a0b14; border:none; font-weight:700;
+    border-radius:12px; padding:12px; font-size:13.5px; cursor:pointer; width:100%;
+    box-shadow:0 6px 20px -6px rgba(124,58,237,0.55);
+  }
+  .btn-solid:active{transform:scale(.985);}
+  .form{background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:16px; padding:14px; margin-top:10px; backdrop-filter:blur(14px);}
+  .form input, .form textarea, .form select{
+    width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--border); color:var(--text);
+    border-radius:10px; padding:10px 12px; font-size:13.5px; margin-bottom:9px; font-family:var(--f-body);
+  }
+  .form input:focus, .form textarea:focus{outline:none; border-color:var(--violet); box-shadow:0 0 0 3px rgba(167,139,250,0.15);}
+  .form label{font-size:10.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.8px; display:block; margin-bottom:5px;}
+  .form-row{display:flex; gap:8px;}
+  .form-row > div{flex:1;}
+  .form-actions{display:flex; gap:8px; margin-top:4px;}
+  .form-actions .btn, .form-actions .btn-solid{margin-top:0;}
+
+  /* ---- Entertainment cat pills ---- */
+  .pills{display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:16px; scrollbar-width:none;}
+  .pills::-webkit-scrollbar{display:none;}
+  .pill{
+    flex-shrink:0; padding:9px 16px; border-radius:22px; font-size:13px;
+    border:1px solid var(--border); color:var(--text-dim); cursor:pointer; white-space:nowrap;
+    background:var(--card); backdrop-filter:blur(10px);
+  }
+  .pill.active{background:linear-gradient(135deg,var(--violet-deep),var(--cyan)); color:#0a0b14; border-color:transparent; font-weight:700; box-shadow:0 4px 16px -4px rgba(124,58,237,0.6);}
+  .subtabs{display:flex; gap:7px; margin-bottom:14px;}
+  .subtab{flex:1; text-align:center; padding:9px; border-radius:11px; font-size:12.5px; border:1px solid var(--border); color:var(--text-dim); cursor:pointer; background:var(--card);}
+  .subtab.active{background:rgba(167,139,250,0.14); color:var(--violet); border-color:rgba(167,139,250,0.4);}
+
+  .stars{color:var(--gold); font-size:13.5px; letter-spacing:1.5px; text-shadow:0 0 10px rgba(251,191,36,0.3);}
+  .comment{font-size:12.5px; color:var(--text-dim); margin-top:6px; font-style:italic; line-height:1.5; padding-left:2px; border-left:2px solid var(--border); padding-left:10px;}
+
+  /* ---- Bottom nav (floating glass) ---- */
+  .nav{
+    position:fixed; bottom:14px; left:12px; right:12px;
+    background:rgba(20,21,38,0.72); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+    border:1px solid var(--border); border-radius:22px; display:flex; z-index:50;
+    box-shadow:0 12px 32px -10px rgba(0,0,0,0.6);
+    padding:6px 4px; overflow-x:auto; scrollbar-width:none;
+  }
+  .nav::-webkit-scrollbar{display:none;}
+  .nav-item{
+    flex:1 0 54px; text-align:center; padding:8px 2px 7px; cursor:pointer;
+    color:var(--text-faint); font-size:9px; letter-spacing:.35px; text-transform:uppercase;
+    border-radius:16px; transition:.2s;
+  }
+  .nav-item .ic{font-size:17px; display:block; margin-bottom:3px; line-height:18px; height:18px;}
+  .nav-item[data-tab="finance"] .ic{transform:translateY(1px);}
+  .nav-item.draggable{touch-action:none;}
+  .nav-item.dragging{opacity:.45;}
+  .nav-item.drag-over{outline:1px dashed var(--cyan);}
+  .nav-item.fixed{touch-action:auto;}
+  .nav-item.active{color:#0a0b14; background:linear-gradient(135deg,var(--violet),var(--cyan));}
+
+  .addsec-item{padding:14px 15px; background:var(--card); border:1px solid var(--border); border-radius:14px; margin-bottom:9px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; backdrop-filter:blur(14px);}
+  .addsec-item .name{font-family:var(--f-display); font-size:16px;}
+  .chev{color:var(--violet); font-size:18px;}
+
+  .month-nav{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+  .month-nav button{background:var(--card); border:1px solid var(--border); color:var(--violet); border-radius:10px; padding:8px 14px; font-size:15px; backdrop-filter:blur(10px);}
+  .month-title{font-family:var(--f-display); font-style:italic; font-size:18px;}
+
+  /* ---- Onboarding ---- */
+  .onboard-wrap{
+    max-width:520px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column;
+    justify-content:center; padding:32px 24px; position:relative; z-index:1;
+  }
+  .onboard-wrap.top-align{justify-content:flex-start; padding-top:60px;}
+  .onboard-icon{
+    width:84px; height:84px; border-radius:22px; margin:0 auto 22px;
+    background:linear-gradient(135deg,var(--violet-deep),var(--cyan));
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--f-display); font-weight:700; font-size:34px; color:#fff;
+    box-shadow:0 12px 32px -8px rgba(124,58,237,0.6);
+  }
+  .onboard-title{
+    font-family:var(--f-display); font-size:42px; text-align:center; margin-bottom:10px;
+    background:linear-gradient(100deg,#fff 15%, var(--violet) 55%, var(--cyan) 90%);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:var(--violet);
+  }
+  .onboard-sub{font-size:14px; color:var(--text-dim); text-align:center; line-height:1.55; margin-bottom:30px;}
+  .onboard-wrap .section-title{justify-content:center;}
+  .onboard-wrap .section-title::before{display:none;}
+  .onboard-wrap .subhead{text-align:center;}
+  .progress-dots{display:flex; justify-content:center; gap:7px; margin-bottom:22px;}
+  .dot{width:7px; height:7px; border-radius:50%; background:var(--border);}
+  .dot.filled{background:linear-gradient(135deg,var(--violet),var(--cyan));}
+  .ob-error{color:var(--danger); font-size:12px; text-align:center; margin-top:-4px; margin-bottom:10px; min-height:14px;}
+  .lock-card{text-align:center;}
+  .lock-icon{font-size:30px; margin-bottom:10px;}
+
+</style>
+</head>
+<body>
+<div class="aurora aurora-1"></div>
+<div class="aurora aurora-2"></div>
+<div class="aurora aurora-3"></div>
+
+<div id="app"></div>
+
+<div class="nav" id="bottomNav"></div>
+
+<script>
+/* ===================== STORAGE ===================== */
+const STORE_KEY = 'maanas-data-v1';
+let state = null;
+
+const defaultState = () => ({
+  profile: { name: '', onboarded: false, step: 0 },
+  work: [],
+  timetable: [],
+  timetableMeta: { lastDate: todayStr(), history: [] },
+  entertainment: {
+    movies:{label:'Movies', verb:'Watch', toConsume:[], consumed:[]},
+    shows:{label:'Shows', verb:'Watch', toConsume:[], consumed:[]},
+    books:{label:'Books', verb:'Read', toConsume:[], consumed:[]},
+    games:{label:'Games', verb:'Play', toConsume:[], consumed:[]},
+  },
+  custom: [],
+  finance: { have:0, paidToday:0, receivedToday:0, lastDate: todayStr(), history:[], entriesToday:[] },
+  birthdays: [],
+  notes: [],
+  settings: { navOrder: ['month','work','personal','notes','finance','entertainment','birthdays'] },
+  security: { financePassword: '', financeUnlocked: false }
+});
+
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function nowHM(){
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+async function loadState(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    state = raw ? JSON.parse(raw) : defaultState();
+  }catch(e){
+    state = defaultState();
+  }
+  // migrate missing fields
+  const d = defaultState();
+  if(!state.profile) state.profile = d.profile;
+  if(!state.work) state.work = [];
+  if(!state.timetable) state.timetable = [];
+  if(!state.timetableMeta) state.timetableMeta = d.timetableMeta;
+  if(!state.entertainment) state.entertainment = d.entertainment;
+  for(const k of Object.keys(d.entertainment)){
+    if(!state.entertainment[k]) state.entertainment[k] = d.entertainment[k];
+  }
+  if(!state.custom) state.custom = [];
+  if(!state.finance) state.finance = d.finance;
+  if(!state.finance.history) state.finance.history = [];
+  if(!state.finance.entriesToday) state.finance.entriesToday = [];
+  if(!state.birthdays) state.birthdays = [];
+  if(!state.notes) state.notes = [];
+  if(!state.settings) state.settings = d.settings;
+  state.settings.navOrder = d.settings.navOrder;
+  if(!state.security) state.security = d.security;
+  if(typeof state.security.financePassword !== 'string') state.security.financePassword = '';
+  state.security.financeUnlocked = false;
+  rolloverFinanceIfNeeded();
+  rolloverTimetableIfNeeded();
+  await saveState();
+}
+
+async function saveState(){
+  try{
+    localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  }catch(e){ console.error('save failed', e); }
+}
+
+function rolloverFinanceIfNeeded(){
+  const t = todayStr();
+  const f = state.finance;
+  if(f.lastDate !== t){
+    // archive previous day
+    f.history.push({date:f.lastDate, have:f.have, paid:f.paidToday, received:f.receivedToday, entries:f.entriesToday||[]});
+    if(f.history.length>365) f.history.shift();
+    f.paidToday = 0;
+    f.receivedToday = 0;
+    f.entriesToday = [];
+    f.lastDate = t;
+  }
+}
+
+// Archives yesterday's timetable (for "load previous day") and unchecks today's boxes.
+// This ONLY touches state.timetable / state.timetableMeta — it never resets or clears
+// entertainment categories or custom sections/subsections, which persist permanently.
+function rolloverTimetableIfNeeded(){
+  const t = todayStr();
+  const m = state.timetableMeta;
+  if(m.lastDate !== t){
+    if(state.timetable.length>0){
+      m.history.push({date:m.lastDate, entries: JSON.parse(JSON.stringify(state.timetable))});
+      if(m.history.length>60) m.history.shift();
+    }
+    state.timetable.forEach(item=> item.done = false);
+    m.lastDate = t;
+  }
+}
+
+/* ===================== APP STATE (UI) ===================== */
+let currentTab = 'home';
+let entCat = 'movies'; // for entertainment tab
+let entSub = 'toConsume';
+let customOpenId = null; // which custom section is open
+let monthOffset = 0; // 0 = this month
+
+const app = document.getElementById('app');
+
+const NAV_ITEMS = {
+  month:{label:'Monthly', icon:'▤'}, work:{label:'Task', icon:'✎'}, personal:{label:'Time', icon:'◷'}, notes:{label:'P.Note', icon:'☰'},
+  finance:{label:'Fin.', icon:'₹'}, entertainment:{label:'Ent.', icon:'▶'}, birthdays:{label:'Bday', icon:'★'}
+};
+const FIXED_NAV_ORDER = ['month','work','personal','notes','finance','entertainment','birthdays'];
+function buildNav(){
+  const nav = document.getElementById('bottomNav');
+  if(!nav) return;
+  nav.innerHTML = `<div class="nav-item fixed" data-tab="home"><span class="ic">◆</span>Home</div>` +
+    FIXED_NAV_ORDER.map(k=>`<div class="nav-item" data-tab="${k}"><span class="ic">${NAV_ITEMS[k].icon}</span>${NAV_ITEMS[k].label}</div>`).join('') +
+    `<div class="nav-item fixed" data-tab="custom"><span class="ic">+</span>Other</div>`;
+  attachNavHandlers();
+}
+function attachNavHandlers(){
+  const nav = document.getElementById('bottomNav');
+  if(!nav || nav.dataset.ready==='1') return;
+  nav.dataset.ready = '1';
+  nav.addEventListener('click', (e)=>{
+    const item = e.target.closest('.nav-item');
+    if(!item) return;
+    currentTab = item.dataset.tab;
+    monthOffset = 0;
+    render();
+  });
+}
+function financeLocked(){ return !state?.security?.financePassword || !state?.security?.financeUnlocked; }
+
+function render(){
+  const nav = document.getElementById('bottomNav');
+  if(!state.profile.onboarded || !state.security.financePassword){
+    if(nav) nav.style.display = 'none';
+    const obStep = state.profile.onboarded && !state.security.financePassword ? 8 : (state.profile.step||0);
+    app.innerHTML = renderOnboarding(obStep);
+    attachOnboardingHandlers();
+    return;
+  }
+  buildNav();
+  if(nav) nav.style.display = 'flex';
+  rolloverFinanceIfNeeded();
+  rolloverTimetableIfNeeded();
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    n.classList.toggle('active', n.dataset.tab===currentTab);
+  });
+  if(currentTab==='home') app.innerHTML = renderHome();
+  else if(currentTab==='work') app.innerHTML = renderWork();
+  else if(currentTab==='personal') app.innerHTML = renderPersonal();
+  else if(currentTab==='birthdays') app.innerHTML = renderBirthdays();
+  else if(currentTab==='notes') app.innerHTML = renderNotes();
+  else if(currentTab==='entertainment') app.innerHTML = renderEntertainment();
+  else if(currentTab==='finance') app.innerHTML = renderFinance();
+  else if(currentTab==='month') app.innerHTML = renderMonth();
+  else if(currentTab==='custom') app.innerHTML = renderCustomList();
+  else if(currentTab==='customSection') app.innerHTML = renderCustomSection(customOpenId);
+  attachHandlers();
+}
+
+/* ===================== ONBOARDING ===================== */
+// Step map: 0 welcome, 1 name, 2 work, 3 timetable, 4 entertainment, 5 finance, 6 birthday, 7 note, 8 password, 9 finish
+const OB_SECTION_STEPS = [2,3,4,5,6,7,8]; // used for progress dots
+
+function obDots(step){
+  const idx = OB_SECTION_STEPS.indexOf(step);
+  if(idx===-1) return '';
+  return `<div class="progress-dots">${OB_SECTION_STEPS.map((s,i)=>`<div class="dot ${i<=idx?'filled':''}"></div>`).join('')}</div>`;
+}
+
+function renderOnboarding(step){
+  if(step===0){
+    return `<div class="onboard-wrap">
+      <div class="onboard-icon"><svg viewBox="0 0 100 100" width="42" height="42" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="50.0,24.0 51.0,16.0 62.6,18.4 60.3,26.1 68.4,31.6 74.8,26.7 81.2,36.5 74.2,40.4 76.0,50.0 84.0,51.0 81.6,62.6 73.9,60.3 68.4,68.4 73.3,74.8 63.5,81.2 59.6,74.2 50.0,76.0 49.0,84.0 37.4,81.6 39.7,73.9 31.6,68.4 25.2,73.3 18.8,63.5 25.8,59.6 24.0,50.0 16.0,49.0 18.4,37.4 26.1,39.7 31.6,31.6 26.7,25.2 36.5,18.8 40.4,25.8" fill="#fff"/><circle cx="50" cy="50" r="12" fill="#0a0b14"/><circle cx="50" cy="50" r="4" fill="#fff"/></svg></div>
+      <div class="onboard-title">MindGear</div>
+      <div class="onboard-sub">Innovate your day — organize work, time, entertainment, notes, birthdays, and finance in one place.</div>
+      <button class="btn-solid" data-ob="next">Get started</button>
+    </div>`;
+  }
+  if(step===1){
+    return `<div class="onboard-wrap">
+      <div class="section-title">What should we call you?</div>
+      <div class="subhead">This is how MindGear will greet you every day.</div>
+      <div class="form">
+        <label>Your name</label><input id="obName" placeholder="e.g. Maanas" value="${esc(state.profile.name)}">
+      </div>
+      <div class="ob-error" id="obNameError"></div>
+      <button class="btn-solid" data-ob="name-next">Continue</button>
+    </div>`;
+  }
+  if(step===2){
+    return `<div class="onboard-wrap top-align">
+      ${obDots(step)}
+      <div class="section-title">Add your first work task</div>
+      <div class="subhead">You can always add more later from the Work tab.</div>
+      <div class="form">
+        <label>Task</label><input id="f1" placeholder="e.g. Send report to team">
+      </div>
+      <div class="form-actions">
+        <button class="btn" data-ob="skip">Do it later</button>
+        <button class="btn-solid" data-ob="save-work">Add &amp; continue</button>
+      </div>
+    </div>`;
+  }
+  if(step===3){
+    return `<div class="onboard-wrap top-align">
+      ${obDots(step)}
+      <div class="section-title">Set up your timetable</div>
+      <div class="subhead">Add one block from your daily schedule to start.</div>
+      <div class="form">
+        <label>Activity</label><input id="f1" placeholder="e.g. Gym">
+        <div class="form-row">
+          <div><label>Start</label><input id="f2" type="time"></div>
+          <div><label>End</label><input id="f3" type="time"></div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn" data-ob="skip">Do it later</button>
+        <button class="btn-solid" data-ob="save-timetable">Add &amp; continue</button>
+      </div>
+    </div>`;
+  }
+  if(step===4){
+    return `<div class="onboard-wrap top-align">
+      ${obDots(step)}
+      <div class="section-title">Anything to watch, read, or play?</div>
+      <div class="subhead">Add something to your entertainment list.</div>
+      <div class="form">
+        <label>Category</label>
+        <select id="f5">
+          <option value="movies">Movie</option>
+          <option value="shows">Show</option>
+          <option value="books">Book</option>
+          <option value="games">Game</option>
+        </select>
+        <label>Title</label><input id="f1" placeholder="Title">
+      </div>
+      <div class="form-actions">
+        <button class="btn" data-ob="skip">Do it later</button>
+        <button class="btn-solid" data-ob="save-ent">Add &amp; continue</button>
+      </div>
+    </div>`;
+  }
+  if(step===5){
+    return `<div class="onboard-wrap top-align">
+      ${obDots(step)}
+      <div class="section-title">How much do you have right now?</div>
+      <div class="subhead">Sets your starting balance for the finance tracker.</div>
+      <div class="form">
+        <label>Current balance (₹)</label><input id="f1" type="number" placeholder="0">
+      </div>
+      <div class="form-actions">
+        <button class="btn" data-ob="skip">Do it later</button>
+        <button class="btn-solid" data-ob="save-finance">Save &amp; continue</button>
+      </div>
+    </div>`;
+  }
+  if(step===6){
+    return `<div class="onboard-wrap top-align">
+      ${obDots(step)}
+      <div class="section-title">Add a birthday to remember</div>
+      <div class="subhead">You'll get a reminder on Home the day it falls.</div>
+      <div class="form">
+        <label>Name</label><input id="f1" placeholder="e.g. Riya">
+        <label>Date</label><input id="f2" type="date">
+      </div>
+      <div class="form-actions">
+        <button class="btn" data-ob="skip">Do it later</button>
+        <button class="btn-solid" data-ob="save-birthday">Add &amp; continue</button>
+      </div>
+    </div>`;
+  }
+  if(step===7){
+    return `<div class="onboard-wrap top-align">
+      ${obDots(step)}
+      <div class="section-title">Anything on your mind?</div>
+      <div class="subhead">A personal note for anything that doesn't fit elsewhere.</div>
+      <div class="form">
+        <label>Note</label><textarea id="f1" rows="3" placeholder="Write it down..."></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn" data-ob="skip">Do it later</button>
+        <button class="btn-solid" data-ob="save-note">Add &amp; continue</button>
+      </div>
+    </div>`;
+  }
+  if(step===8){
+    return `<div class="onboard-wrap top-align">
+      ${obDots(step)}
+      <div class="section-title">Set finance password</div>
+      <div class="subhead">Required on this phone. Finance stays hidden until this password is entered.</div>
+      <div class="form">
+        <label>Password</label><input id="obPass" type="password" placeholder="Create password">
+        <label>Confirm password</label><input id="obPass2" type="password" placeholder="Repeat password">
+      </div>
+      <div class="ob-error" id="obPassError"></div>
+      <button class="btn-solid" data-ob="save-password">Save &amp; continue</button>
+    </div>`;
+  }
+  return `<div class="onboard-wrap">
+    <div class="onboard-icon"><svg viewBox="0 0 100 100" width="42" height="42" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="50.0,24.0 51.0,16.0 62.6,18.4 60.3,26.1 68.4,31.6 74.8,26.7 81.2,36.5 74.2,40.4 76.0,50.0 84.0,51.0 81.6,62.6 73.9,60.3 68.4,68.4 73.3,74.8 63.5,81.2 59.6,74.2 50.0,76.0 49.0,84.0 37.4,81.6 39.7,73.9 31.6,68.4 25.2,73.3 18.8,63.5 25.8,59.6 24.0,50.0 16.0,49.0 18.4,37.4 26.1,39.7 31.6,31.6 26.7,25.2 36.5,18.8 40.4,25.8" fill="#fff"/><circle cx="50" cy="50" r="12" fill="#0a0b14"/><circle cx="50" cy="50" r="4" fill="#fff"/></svg></div>
+    <div class="onboard-title">You're all set</div>
+    <div class="onboard-sub">Welcome to MindGear, ${esc(state.profile.name)}. Innovate your day — everything is ready.</div>
+    <button class="btn-solid" data-ob="finish">Go to MindGear</button>
+  </div>`;
+}
+
+async function obAdvance(nextStep){
+  state.profile.step = nextStep;
+  await saveState();
+  render();
+}
+
+function attachOnboardingHandlers(){
+  document.querySelectorAll('[data-ob]').forEach(el=>{
+    el.onclick = async ()=>{
+      const ob = el.dataset.ob;
+      const step = state.profile.step||0;
+      if(ob==='next'){
+        await obAdvance(1);
+      }else if(ob==='name-next'){
+        const val = document.getElementById('obName').value.trim();
+        if(!val){
+          document.getElementById('obNameError').textContent = 'Please enter your name to continue.';
+          return;
+        }
+        state.profile.name = val;
+        await obAdvance(2);
+      }else if(ob==='skip'){
+        await obAdvance(step+1);
+      }else if(ob==='save-work'){
+        const val = document.getElementById('f1').value.trim();
+        if(val) state.work.push({id:uid(), text:val, done:false});
+        await obAdvance(step+1);
+      }else if(ob==='save-timetable'){
+        const val = document.getElementById('f1').value.trim();
+        if(val){
+          state.timetable.push({id:uid(), activity:val, start:document.getElementById('f2').value, end:document.getElementById('f3').value, done:false});
+        }
+        await obAdvance(step+1);
+      }else if(ob==='save-ent'){
+        const val = document.getElementById('f1').value.trim();
+        const cat = document.getElementById('f5').value;
+        if(val) state.entertainment[cat].toConsume.push({id:uid(), title:val, from:'', to:'', time:''});
+        await obAdvance(step+1);
+      }else if(ob==='save-finance'){
+        const val = parseFloat(document.getElementById('f1').value);
+        if(!isNaN(val)) state.finance.have = val;
+        await obAdvance(step+1);
+      }else if(ob==='save-birthday'){
+        const val = document.getElementById('f1').value.trim();
+        const date = document.getElementById('f2').value;
+        if(val && date) state.birthdays.push({id:uid(), name:val, date, note:''});
+        await obAdvance(step+1);
+      }else if(ob==='save-note'){
+        const val = document.getElementById('f1').value.trim();
+        if(val) state.notes.unshift({id:uid(), text:val, date:todayStr()});
+        await obAdvance(step+1);
+      }else if(ob==='save-password'){
+        const p1 = document.getElementById('obPass').value;
+        const p2 = document.getElementById('obPass2').value;
+        const err = document.getElementById('obPassError');
+        if(!p1 || p1.length < 4){ err.textContent = 'Use at least 4 characters.'; return; }
+        if(p1 !== p2){ err.textContent = 'Passwords do not match.'; return; }
+        state.security.financePassword = p1;
+        state.security.financeUnlocked = false;
+        await obAdvance(9);
+      }else if(ob==='finish'){
+        state.profile.onboarded = true;
+        state.profile.step = 0;
+        currentTab = 'home';
+        await saveState();
+        render();
+      }
+    };
+  });
+}
+
+/* ===================== HOME ===================== */
+function renderHome(){
+  const t = todayStr();
+  const name = state.profile.name || 'there';
+  let html = `<div class="home-header">
+    <div class="brandmark">MINDGEAR</div>
+    <div class="greeting">Hi, <em>${esc(name)}</em></div>
+    <div class="tagline">Innovate your day.</div>
+    <div class="stamp">${formatDatePretty(t)}</div>
+  </div><div class="wrap" style="padding-top:0;">`;
+
+  // Birthdays today
+  const mmdd = t.slice(5);
+  const todaysBdays = state.birthdays.filter(b=> b.date && b.date.slice(5)===mmdd);
+  if(todaysBdays.length>0){
+    html += `<div class="section-title">Birthdays</div>`;
+    todaysBdays.forEach(b=>{
+      const yr = parseInt((b.date||'').slice(0,4));
+      const age = (yr && yr>1900) ? (new Date().getFullYear() - yr) : null;
+      html += `<div class="tile" style="border-left-color:var(--gold);">
+        <div class="tile-label">🎂 Birthday today</div>
+        <div class="tile-body">${esc(b.name)}${age?` turns ${age}`:''}</div>
+        ${b.note?`<div class="tile-meta">${esc(b.note)}</div>`:''}
+      </div>`;
+    });
+  }
+
+  // Work
+  const pendingWork = state.work.filter(w=>!w.done);
+  html += `<div class="section-title">Work today</div>`;
+  if(pendingWork.length===0){
+    html += `<div class="empty-note">Nothing pending — you're clear.</div>`;
+  }else{
+    pendingWork.slice(0,5).forEach(w=>{
+      html += `<div class="tile"><div class="tile-label">Task</div><div class="tile-body">${esc(w.text)}</div></div>`;
+    });
+  }
+
+  // Timetable — current
+  const now = nowHM();
+  const cur = state.timetable.find(x=> x.start && x.end && now>=x.start && now<=x.end);
+  html += `<div class="section-title">Right now</div>`;
+  if(cur){
+    html += `<div class="tile"><div class="tile-label">${cur.start}–${cur.end}</div><div class="tile-body">${esc(cur.activity)}</div></div>`;
+  }else{
+    html += `<div class="empty-note">Nothing scheduled at this hour.</div>`;
+  }
+
+  // Entertainment — active ranges today
+  const entTiles = [];
+  for(const key of Object.keys(state.entertainment)){
+    const cat = state.entertainment[key];
+    (cat.toConsume||[]).forEach(item=>{
+      if(inRange(item, t)) entTiles.push({verb:cat.verb, label:cat.label, item});
+    });
+  }
+  for(const c of state.custom){
+    for(const sub of (c.subsections||[])){
+      (sub.toConsume||[]).forEach(item=>{
+        if(inRange(item, t)) entTiles.push({verb:'Do', label:c.name+' · '+sub.name, item});
+      });
+    }
+  }
+  html += `<div class="section-title">On today's list</div>`;
+  if(entTiles.length===0){
+    html += `<div class="empty-note">Nothing scheduled for today.</div>`;
+  }else{
+    entTiles.forEach(x=>{
+      html += `<div class="tile"><div class="tile-label">${x.verb} · ${esc(x.label)}</div><div class="tile-body">${esc(x.item.title)}</div>
+      ${x.item.time?`<div class="tile-meta">${esc(x.item.time)}</div>`:''}</div>`;
+    });
+  }
+
+  // Finance is hidden from Home until unlocked
+  if(!financeLocked()){
+    const f = state.finance;
+    html += `<div class="section-title">Finance</div>
+    <div class="fin-grid">
+      <div class="fin-box have"><div class="v">${fmtMoney(f.have)}</div><div class="l">Have</div></div>
+      <div class="fin-box recv"><div class="v">${fmtMoney(f.receivedToday)}</div><div class="l">Received</div></div>
+      <div class="fin-box paid"><div class="v">${fmtMoney(f.paidToday)}</div><div class="l">Paid</div></div>
+    </div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function inRange(item, t){
+  if(!item.from && !item.to) return false;
+  const from = item.from || '0000-01-01';
+  const to = item.to || '9999-12-31';
+  return t>=from && t<=to;
+}
+function formatDatePretty(t){
+  const d = new Date(t+'T00:00:00');
+  return d.toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric', year:'numeric'});
+}
+function fmtMoney(n){
+  n = Number(n)||0;
+  return '₹'+n.toLocaleString('en-IN');
+}
+function esc(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ===================== WORK ===================== */
+function renderWork(){
+  let html = `<div class="wrap">
+    <div class="section-title">Work</div>
+    <div class="subhead">Your task list. Check off as you go.</div>
+    <div class="card">`;
+  if(state.work.length===0){
+    html += `<div class="empty-note">No tasks yet — add your first one below.</div>`;
+  }else{
+    state.work.forEach(w=>{
+      html += `<div class="row">
+        <div class="check ${w.done?'done':''}" data-act="toggleWork" data-id="${w.id}"></div>
+        <div class="row-text ${w.done?'done':''}">${esc(w.text)}</div>
+        <div class="row-del" data-act="delWork" data-id="${w.id}">✕</div>
+      </div>`;
+    });
+  }
+  html += `</div>
+    <button class="btn" data-act="showForm" data-form="work">+ Add task</button>
+    <div id="formSlot"></div>
+  </div>`;
+  return html;
+}
+
+/* ===================== PERSONAL / TIMETABLE ===================== */
+function renderPersonal(){
+  let html = `<div class="wrap">
+    <div class="section-title">Personal · Timetable</div>
+    <div class="subhead">Your daily schedule. Check off completed blocks.</div>
+    <div class="card">`;
+  const sorted = [...state.timetable].sort((a,b)=> (a.start||'').localeCompare(b.start||''));
+  if(sorted.length===0){
+    html += `<div class="empty-note">No timetable entries yet.</div>`;
+  }else{
+    sorted.forEach(w=>{
+      html += `<div class="row">
+        <div class="check ${w.done?'done':''}" data-act="toggleTT" data-id="${w.id}"></div>
+        <div style="flex:1;">
+          <div class="row-text ${w.done?'done':''}">${esc(w.activity)}</div>
+          <div class="row-sub">${w.start||'--:--'} – ${w.end||'--:--'}</div>
+        </div>
+        <div class="row-del" data-act="delTT" data-id="${w.id}">✕</div>
+      </div>`;
+    });
+  }
+  html += `</div>
+    <button class="btn" data-act="showForm" data-form="timetable">+ Add time block</button>`;
+  if(state.timetableMeta.history.length>0){
+    html += `<button class="btn" data-act="loadPrevDay">↺ Load previous day's timetable</button>`;
+  }
+  html += `<div id="formSlot"></div>
+  </div>`;
+  return html;
+}
+
+/* ===================== ENTERTAINMENT ===================== */
+function renderEntertainment(){
+  const cats = state.entertainment;
+  let html = `<div class="wrap">
+    <div class="section-title">Entertainment</div>
+    <div class="pills">`;
+  for(const key of Object.keys(cats)){
+    html += `<div class="pill ${entCat===key?'active':''}" data-act="setEntCat" data-key="${key}">${cats[key].label}</div>`;
+  }
+  html += `</div>`;
+
+  const cat = cats[entCat];
+  html += `<div class="subtabs">
+    <div class="subtab ${entSub==='toConsume'?'active':''}" data-act="setEntSub" data-sub="toConsume">To ${cat.verb}</div>
+    <div class="subtab ${entSub==='consumed'?'active':''}" data-act="setEntSub" data-sub="consumed">${cat.verb}ed</div>
+  </div>`;
+
+  html += `<div class="card">`;
+  const list = cat[entSub];
+  if(!list || list.length===0){
+    html += `<div class="empty-note">Nothing here yet.</div>`;
+  }else if(entSub==='toConsume'){
+    list.forEach(it=>{
+      html += `<div class="row">
+        <div style="flex:1;">
+          <div class="row-text">${esc(it.title)}</div>
+          <div class="row-sub">${it.from||'?'} → ${it.to||'?'}${it.time?' · '+esc(it.time):''}</div>
+        </div>
+        <div class="row-del" data-act="markConsumed" data-key="${entCat}" data-id="${it.id}">✓</div>
+        <div class="row-del" data-act="delEntItem" data-key="${entCat}" data-sub="toConsume" data-id="${it.id}">✕</div>
+      </div>`;
+    });
+  }else{
+    list.forEach(it=>{
+      html += `<div class="row" style="flex-direction:column; align-items:stretch;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="row-text">${esc(it.title)}</div>
+          <div class="row-del" data-act="delEntItem" data-key="${entCat}" data-sub="consumed" data-id="${it.id}">✕</div>
+        </div>
+        <div class="stars">${'★'.repeat(it.rating||0)}${'☆'.repeat(5-(it.rating||0))}</div>
+        ${it.comment?`<div class="comment">"${esc(it.comment)}"</div>`:''}
+      </div>`;
+    });
+  }
+  html += `</div>
+    <button class="btn" data-act="showForm" data-form="ent-${entSub}" data-key="${entCat}">+ Add to ${entSub==='toConsume'?'to-'+cat.verb.toLowerCase()+' list':'log'}</button>
+    <div id="formSlot"></div>
+  </div>`;
+  return html;
+}
+
+/* ===================== FINANCE ===================== */
+function renderFinanceEntries(entries){
+  if(!entries || entries.length===0) return `<div class="empty-note">No detailed entries yet.</div>`;
+  return entries.slice().reverse().map(e=>{
+    const typeLabel = e.type==='received' ? 'Received' : e.type==='paid' ? 'Paid' : 'Balance set';
+    const color = e.type==='received' ? 'var(--sage)' : e.type==='paid' ? 'var(--rose)' : 'var(--cyan)';
+    const signed = e.type==='paid' ? '-' : e.type==='received' ? '+' : '';
+    return `<div class="row" style="flex-direction:column; align-items:stretch;">
+      <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start;">
+        <div style="flex:1;">
+          <div class="row-text">${typeLabel}</div>
+          <div class="row-sub">${e.time||''}${e.note?' · '+esc(e.note):''}</div>
+        </div>
+        <div class="row-text" style="flex:0 0 auto; color:${color}; font-family:var(--f-mono);">${signed}${fmtMoney(e.amount)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderFinanceLock(){
+  return `<div class="wrap">
+    <div class="section-title">Finance locked</div>
+    <div class="card lock-card">
+      <div class="lock-icon">🔒</div>
+      <div class="row-text" style="font-weight:600; margin-bottom:6px;">Enter your local password</div>
+      <div class="row-sub" style="margin-bottom:12px;">Finance details are hidden on Home and inside this section until unlocked.</div>
+      <div class="form" style="text-align:left; margin-top:0;">
+        <label>Password</label><input id="financePass" type="password" placeholder="Finance password">
+        <div class="ob-error" id="financePassError"></div>
+        <button class="btn-solid" data-act="unlockFinance">Unlock finance</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderFinance(){
+  if(financeLocked()) return renderFinanceLock();
+  const f = state.finance;
+  if(!f.entriesToday) f.entriesToday = [];
+  let html = `<div class="wrap">
+    <div class="section-title">Finance</div>
+    <div class="subhead">Today's ledger — add a reason note for paid/received items. Resets each day and saves to history.</div>
+    <div class="fin-grid">
+      <div class="fin-box have"><div class="v">${fmtMoney(f.have)}</div><div class="l">Have</div></div>
+      <div class="fin-box recv"><div class="v">${fmtMoney(f.receivedToday)}</div><div class="l">Received</div></div>
+      <div class="fin-box paid"><div class="v">${fmtMoney(f.paidToday)}</div><div class="l">Paid</div></div>
+    </div>
+    <button class="btn" data-act="showForm" data-form="finance-received">+ Log money received</button>
+    <button class="btn" data-act="showForm" data-form="finance-paid">+ Log money paid</button>
+    <button class="btn" data-act="showForm" data-form="finance-set">+ Set current balance</button>
+    <button class="btn" data-act="resetFinanceDay">↺ Reset today's finance</button>
+    <div id="formSlot"></div>
+
+    <div class="section-title">Today's entries</div>
+    <div class="card">${renderFinanceEntries(f.entriesToday)}</div>
+
+    <div class="section-title">History</div>`;
+  const hist = [...f.history].reverse().slice(0,14);
+  if(hist.length===0){
+    html += `<div class="empty-note">No past days recorded yet.</div>`;
+  }else{
+    hist.forEach(h=>{
+      html += `<div class="card">
+        <div class="row" style="border-bottom:none; padding-top:0;">
+          <div style="flex:1;">
+            <div class="row-text" style="font-weight:600;">${h.date}</div>
+            <div class="row-sub">Have ${fmtMoney(h.have)} · Received ${fmtMoney(h.received)} · Paid ${fmtMoney(h.paid)}</div>
+          </div>
+        </div>
+        ${renderFinanceEntries(h.entries||[])}
+      </div>`;
+    });
+  }
+  html += `</div>`;
+  return html;
+}
+
+/* ===================== MONTH ===================== */
+function getMonthKey(offset){
+  const d = new Date();
+  d.setMonth(d.getMonth()+offset);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+}
+function renderMonth(){
+  const mk = getMonthKey(monthOffset);
+  const monthLabel = new Date(mk+'-01T00:00:00').toLocaleDateString('en-US',{month:'long', year:'numeric'});
+  let html = `<div class="wrap">
+    <div class="section-title">Month overview</div>
+    <div class="month-nav">
+      <button data-act="monthPrev">‹</button>
+      <div class="month-title">${monthLabel}</div>
+      <button data-act="monthNext">›</button>
+    </div>`;
+
+  // Finance monthly
+  let paidSum=0, recvSum=0;
+  state.finance.history.forEach(h=>{ if(h.date.startsWith(mk)){ paidSum+=h.paid; recvSum+=h.received; }});
+  if(state.finance.lastDate.startsWith(mk)){ paidSum+=state.finance.paidToday; recvSum+=state.finance.receivedToday; }
+  html += `<div class="section-title">Finance</div>
+    <div class="fin-grid">
+      <div class="fin-box recv"><div class="v">${fmtMoney(recvSum)}</div><div class="l">Received</div></div>
+      <div class="fin-box paid"><div class="v">${fmtMoney(paidSum)}</div><div class="l">Paid</div></div>
+      <div class="fin-box have"><div class="v">${fmtMoney(recvSum-paidSum)}</div><div class="l">Net</div></div>
+    </div>`;
+
+  // Entertainment done + upcoming this month
+  html += `<div class="section-title">Entertainment</div>`;
+  let any=false;
+  for(const key of Object.keys(state.entertainment)){
+    const cat = state.entertainment[key];
+    const done = (cat.consumed||[]).filter(x=>(x.date||'').startsWith(mk));
+    const upcoming = (cat.toConsume||[]).filter(x=> overlapsMonth(x, mk));
+    if(done.length || upcoming.length){
+      any=true;
+      html += `<div class="card"><div class="row-text" style="font-weight:600; margin-bottom:6px;">${cat.label}</div>`;
+      done.forEach(x=> html += `<div class="row"><div style="flex:1;"><div class="row-text">${esc(x.title)}</div><div class="row-sub">${x.date||''} · ${'★'.repeat(x.rating||0)}</div></div></div>`);
+      upcoming.forEach(x=> html += `<div class="row"><div style="flex:1;"><div class="row-text">${esc(x.title)}</div><div class="row-sub">${x.from||'?'} → ${x.to||'?'}</div></div></div>`);
+      html += `</div>`;
+    }
+  }
+  if(!any) html += `<div class="empty-note">Nothing logged for this month yet.</div>`;
+
+  html += `</div>`;
+  return html;
+}
+function overlapsMonth(item, mk){
+  if(!item.from && !item.to) return false;
+  const from = (item.from||'0000-01-01').slice(0,7);
+  const to = (item.to||'9999-12-31').slice(0,7);
+  return mk>=from && mk<=to;
+}
+
+/* ===================== CUSTOM SECTIONS ===================== */
+function renderBirthdays(){
+  let html = `<div class="wrap">
+    <div class="section-title">Birthdays</div>
+    <div class="subhead">Add anyone's birthday — you'll get a reminder on Home the day it falls.</div>
+    <div class="card">`;
+  if(state.birthdays.length===0){
+    html += `<div class="empty-note">No birthdays saved yet.</div>`;
+  }else{
+    const sorted = [...state.birthdays].sort((a,b)=> (a.date||'').slice(5).localeCompare((b.date||'').slice(5)));
+    sorted.forEach(b=>{
+      const d = new Date((b.date||'')+'T00:00:00');
+      const pretty = isNaN(d) ? '' : d.toLocaleDateString('en-US',{month:'short', day:'numeric'});
+      html += `<div class="row">
+        <div style="flex:1;">
+          <div class="row-text">${esc(b.name)}</div>
+          <div class="row-sub">${pretty}${b.note?' · '+esc(b.note):''}</div>
+        </div>
+        <div class="row-del" data-act="delBirthday" data-id="${b.id}">✕</div>
+      </div>`;
+    });
+  }
+  html += `</div>
+    <button class="btn" data-act="showForm" data-form="birthday">+ Add birthday</button>
+    <div id="formSlot-bday"></div>
+  </div>`;
+  return html;
+}
+
+function renderNotes(){
+  let html = `<div class="wrap">
+    <div class="section-title">Personal notes</div>
+    <div class="subhead">Anything important that doesn't fit anywhere else.</div>
+    <div class="card">`;
+  if(state.notes.length===0){
+    html += `<div class="empty-note">No notes yet.</div>`;
+  }else{
+    state.notes.forEach(n=>{
+      html += `<div class="row" style="flex-direction:column; align-items:stretch;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+          <div class="row-text" style="white-space:pre-wrap;">${esc(n.text)}</div>
+          <div class="row-del" data-act="delNote" data-id="${n.id}">✕</div>
+        </div>
+        <div class="row-sub">${n.date||''}</div>
+      </div>`;
+    });
+  }
+  html += `</div>
+    <button class="btn" data-act="showForm" data-form="note">+ Add note</button>
+    <div id="formSlot-note"></div>
+  </div>`;
+  return html;
+}
+
+function renderCustomList(){
+  let html = `<div class="wrap">
+    <div class="section-title">More sections</div>
+    <div class="subhead">Add your own sections with subsections, mirroring entertainment (to-do / done, rated with comments).</div>`;
+  state.custom.forEach(c=>{
+    html += `<div class="addsec-item" data-act="openCustom" data-id="${c.id}">
+      <div class="name">${esc(c.name)}</div>
+      <div class="chev">›</div>
+    </div>`;
+  });
+  html += `<button class="btn" data-act="showForm" data-form="newCustomSection">+ Add new section</button>
+    <div id="formSlot"></div>
+    <div class="section-title">Backup</div>
+    <div class="subhead">Your data lives only in this browser on this phone. Export a backup now and then to be safe, or move it to a new device.</div>
+    <button class="btn" data-act="exportData">↓ Export backup (.json)</button>
+    <button class="btn" data-act="triggerImport">↑ Restore from backup</button>
+    <input type="file" id="importFile" accept="application/json" style="display:none;">
+  </div>`;
+  return html;
+}
+
+function renderCustomSection(id){
+  const c = state.custom.find(x=>x.id===id);
+  if(!c){ currentTab='custom'; return renderCustomList(); }
+  let html = `<div class="wrap">
+    <div class="section-title" style="cursor:pointer;" data-act="backToCustom">‹ ${esc(c.name)}</div>`;
+  c.subsections.forEach(sub=>{
+    html += `<div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div class="row-text" style="font-weight:600;">${esc(sub.name)}</div>
+      </div>
+      <div class="subtabs">
+        <div class="subtab active" style="pointer-events:none;">To do</div>
+      </div>`;
+    if((sub.toConsume||[]).length===0){
+      html += `<div class="empty-note">Nothing pending.</div>`;
+    }else{
+      sub.toConsume.forEach(it=>{
+        html += `<div class="row">
+          <div style="flex:1;">
+            <div class="row-text">${esc(it.title)}</div>
+            <div class="row-sub">${it.from||'?'} → ${it.to||'?'}${it.time?' · '+esc(it.time):''}</div>
+          </div>
+          <div class="row-del" data-act="markCustomDone" data-cid="${c.id}" data-sid="${sub.id}" data-id="${it.id}">✓</div>
+          <div class="row-del" data-act="delCustomItem" data-cid="${c.id}" data-sid="${sub.id}" data-sub="toConsume" data-id="${it.id}">✕</div>
+        </div>`;
+      });
+    }
+    html += `<button class="btn" data-act="showForm" data-form="custom-todo" data-cid="${c.id}" data-sid="${sub.id}">+ Add to-do item</button>`;
+
+    if((sub.consumed||[]).length>0){
+      html += `<div class="subtabs" style="margin-top:12px;"><div class="subtab active" style="pointer-events:none;">Done</div></div>`;
+      sub.consumed.forEach(it=>{
+        html += `<div class="row" style="flex-direction:column; align-items:stretch;">
+          <div style="display:flex; justify-content:space-between;">
+            <div class="row-text">${esc(it.title)}</div>
+            <div class="row-del" data-act="delCustomItem" data-cid="${c.id}" data-sid="${sub.id}" data-sub="consumed" data-id="${it.id}">✕</div>
+          </div>
+          <div class="stars">${'★'.repeat(it.rating||0)}${'☆'.repeat(5-(it.rating||0))}</div>
+          ${it.comment?`<div class="comment">"${esc(it.comment)}"</div>`:''}
+        </div>`;
+      });
+    }
+    html += `</div>`;
+  });
+  html += `<button class="btn" data-act="showForm" data-form="newCustomSub" data-cid="${c.id}">+ Add subsection</button>
+    <div id="formSlot"></div>
+  </div>`;
+  return html;
+}
+
+/* ===================== FORMS ===================== */
+function showForm(kind, ctx){
+  let slotId = 'formSlot';
+  if(kind==='birthday') slotId = 'formSlot-bday';
+  else if(kind==='note') slotId = 'formSlot-note';
+  const slot = document.getElementById(slotId);
+  if(!slot) return;
+  let html = '';
+  if(kind==='work'){
+    html = `<div class="form">
+      <label>Task</label><input id="f1" placeholder="e.g. Send report to team">
+      <div class="form-actions"><button class="btn-solid" data-submit="work">Add</button></div>
+    </div>`;
+  }else if(kind==='timetable'){
+    html = `<div class="form">
+      <label>Activity</label><input id="f1" placeholder="e.g. Gym">
+      <div class="form-row">
+        <div><label>Start</label><input id="f2" type="time"></div>
+        <div><label>End</label><input id="f3" type="time"></div>
+      </div>
+      <div class="form-actions"><button class="btn-solid" data-submit="timetable">Add</button></div>
+    </div>`;
+  }else if(kind==='ent-toConsume'){
+    html = `<div class="form">
+      <label>Title</label><input id="f1" placeholder="Title">
+      <div class="form-row">
+        <div><label>From</label><input id="f2" type="date"></div>
+        <div><label>To</label><input id="f3" type="date"></div>
+      </div>
+      <label>Expected time (optional)</label><input id="f4" type="time">
+      <div class="form-actions"><button class="btn-solid" data-submit="ent-toConsume" data-key="${ctx}">Add</button></div>
+    </div>`;
+  }else if(kind==='ent-consumed'){
+    html = `<div class="form">
+      <label>Title</label><input id="f1" placeholder="Title">
+      <label>Rating (1-5)</label><input id="f2" type="number" min="1" max="5" placeholder="5">
+      <label>Your comment</label><textarea id="f3" rows="2" placeholder="Your thoughts..."></textarea>
+      <div class="form-actions"><button class="btn-solid" data-submit="ent-consumed" data-key="${ctx}">Add</button></div>
+    </div>`;
+  }else if(kind==='finance-received' || kind==='finance-paid'){
+    html = `<div class="form">
+      <label>Amount (₹)</label><input id="f1" type="number" placeholder="0">
+      <label>Reason / note</label><input id="f2" placeholder="e.g. Food, salary, travel, refund">
+      <div class="form-actions"><button class="btn-solid" data-submit="${kind}">Add</button></div>
+    </div>`;
+  }else if(kind==='finance-set'){
+    html = `<div class="form">
+      <label>Current balance (₹)</label><input id="f1" type="number" value="${state.finance.have}">
+      <div class="form-actions"><button class="btn-solid" data-submit="finance-set">Save</button></div>
+    </div>`;
+  }else if(kind==='newCustomSection'){
+    html = `<div class="form">
+      <label>Section name</label><input id="f1" placeholder="e.g. Fitness, Learning">
+      <div class="form-actions"><button class="btn-solid" data-submit="newCustomSection">Create</button></div>
+    </div>`;
+  }else if(kind==='newCustomSub'){
+    html = `<div class="form">
+      <label>Subsection name</label><input id="f1" placeholder="e.g. Courses">
+      <div class="form-actions"><button class="btn-solid" data-submit="newCustomSub" data-cid="${ctx.cid}">Create</button></div>
+    </div>`;
+  }else if(kind==='custom-todo'){
+    html = `<div class="form">
+      <label>Title</label><input id="f1" placeholder="Title">
+      <div class="form-row">
+        <div><label>From</label><input id="f2" type="date"></div>
+        <div><label>To</label><input id="f3" type="date"></div>
+      </div>
+      <label>Expected time (optional)</label><input id="f4" type="time">
+      <div class="form-actions"><button class="btn-solid" data-submit="custom-todo" data-cid="${ctx.cid}" data-sid="${ctx.sid}">Add</button></div>
+    </div>`;
+  }else if(kind==='birthday'){
+    html = `<div class="form">
+      <label>Name</label><input id="f1" placeholder="e.g. Riya">
+      <label>Date</label><input id="f2" type="date">
+      <label>Note (optional)</label><input id="f3" placeholder="e.g. loves chocolate cake">
+      <div class="form-actions"><button class="btn-solid" data-submit="birthday">Add</button></div>
+    </div>`;
+  }else if(kind==='note'){
+    html = `<div class="form">
+      <label>Note</label><textarea id="f1" rows="3" placeholder="Write it down..."></textarea>
+      <div class="form-actions"><button class="btn-solid" data-submit="note">Add</button></div>
+    </div>`;
+  }
+  slot.innerHTML = html;
+  attachHandlers();
+}
+
+/* ===================== HANDLERS ===================== */
+function attachHandlers(){
+  document.querySelectorAll('[data-act]').forEach(el=>{
+    el.onclick = async (e)=>{
+      const act = el.dataset.act;
+      if(act==='toggleWork'){
+        const t = state.work.find(x=>x.id===el.dataset.id); t.done=!t.done; await saveState(); render();
+      }else if(act==='delWork'){
+        state.work = state.work.filter(x=>x.id!==el.dataset.id); await saveState(); render();
+      }else if(act==='toggleTT'){
+        const t = state.timetable.find(x=>x.id===el.dataset.id); t.done=!t.done; await saveState(); render();
+      }else if(act==='delTT'){
+        state.timetable = state.timetable.filter(x=>x.id!==el.dataset.id); await saveState(); render();
+      }else if(act==='setEntCat'){
+        entCat = el.dataset.key; entSub='toConsume'; render();
+      }else if(act==='setEntSub'){
+        entSub = el.dataset.sub; render();
+      }else if(act==='markConsumed'){
+        const cat = state.entertainment[el.dataset.key];
+        const it = cat.toConsume.find(x=>x.id===el.dataset.id);
+        if(it){
+          cat.toConsume = cat.toConsume.filter(x=>x.id!==el.dataset.id);
+          cat.consumed.unshift({id:uid(), title:it.title, rating:0, comment:'', date: todayStr()});
+          await saveState(); render();
+        }
+      }else if(act==='delEntItem'){
+        const cat = state.entertainment[el.dataset.key];
+        cat[el.dataset.sub] = cat[el.dataset.sub].filter(x=>x.id!==el.dataset.id);
+        await saveState(); render();
+      }else if(act==='showForm'){
+        const form = el.dataset.form;
+        if(form==='newCustomSub') showForm(form, {cid:el.dataset.cid});
+        else if(form==='custom-todo') showForm(form, {cid:el.dataset.cid, sid:el.dataset.sid});
+        else showForm(form, el.dataset.key);
+      }else if(act==='openCustom'){
+        customOpenId = el.dataset.id; currentTab='customSection'; render();
+      }else if(act==='backToCustom'){
+        currentTab='custom'; render();
+      }else if(act==='markCustomDone'){
+        const c = state.custom.find(x=>x.id===el.dataset.cid);
+        const sub = c.subsections.find(x=>x.id===el.dataset.sid);
+        const it = sub.toConsume.find(x=>x.id===el.dataset.id);
+        if(it){
+          sub.toConsume = sub.toConsume.filter(x=>x.id!==el.dataset.id);
+          sub.consumed.unshift({id:uid(), title:it.title, rating:0, comment:'', date:todayStr()});
+          await saveState(); render();
+        }
+      }else if(act==='delCustomItem'){
+        const c = state.custom.find(x=>x.id===el.dataset.cid);
+        const sub = c.subsections.find(x=>x.id===el.dataset.sid);
+        sub[el.dataset.sub] = sub[el.dataset.sub].filter(x=>x.id!==el.dataset.id);
+        await saveState(); render();
+      }else if(act==='delBirthday'){
+        state.birthdays = state.birthdays.filter(x=>x.id!==el.dataset.id);
+        await saveState(); render();
+      }else if(act==='delNote'){
+        state.notes = state.notes.filter(x=>x.id!==el.dataset.id);
+        await saveState(); render();
+      }else if(act==='resetFinanceDay'){
+        const f = state.finance;
+        if(confirm('Reset today\'s finance entries and undo today\'s paid/received amounts from balance?')){
+          f.have = (Number(f.have)||0) - (Number(f.receivedToday)||0) + (Number(f.paidToday)||0);
+          f.paidToday = 0;
+          f.receivedToday = 0;
+          f.entriesToday = [];
+          await saveState(); render();
+        }
+      }else if(act==='unlockFinance'){
+        const pass = document.getElementById('financePass')?.value || '';
+        if(pass === state.security.financePassword){
+          state.security.financeUnlocked = true;
+          await saveState(); render();
+        }else{
+          const err = document.getElementById('financePassError');
+          if(err) err.textContent = 'Wrong password.';
+        }
+      }else if(act==='loadPrevDay'){
+        const hist = state.timetableMeta.history;
+        if(hist.length===0) return;
+        const prev = hist[hist.length-1];
+        if(confirm(`Load ${prev.date}'s timetable into today? This adds to your current list.`)){
+          prev.entries.forEach(e=>{
+            state.timetable.push({id:uid(), activity:e.activity, start:e.start, end:e.end, done:false});
+          });
+          await saveState(); render();
+        }
+      }else if(act==='exportData'){
+        const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'mindgear-backup-'+todayStr()+'.json';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }else if(act==='triggerImport'){
+        document.getElementById('importFile').click();
+      }else if(act==='monthPrev'){
+        monthOffset--; render();
+      }else if(act==='monthNext'){
+        monthOffset = Math.min(0, monthOffset+1); render();
+      }
+    };
+  });
+
+  const importInput = document.getElementById('importFile');
+  if(importInput){
+    importInput.onchange = async (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      try{
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        if(confirm('Replace all current data with this backup?')){
+          state = parsed;
+          rolloverFinanceIfNeeded();
+          await saveState();
+          render();
+        }
+      }catch(err){
+        alert('Could not read that file — make sure it\'s a MindGear backup .json file.');
+      }
+    };
+  }
+
+  document.querySelectorAll('[data-submit]').forEach(el=>{
+    el.onclick = async ()=>{
+      const kind = el.dataset.submit;
+      const v1 = document.getElementById('f1');
+      const val1 = v1 ? v1.value.trim() : '';
+      if(kind==='work'){
+        if(!val1) return;
+        state.work.push({id:uid(), text:val1, done:false});
+      }else if(kind==='timetable'){
+        if(!val1) return;
+        state.timetable.push({id:uid(), activity:val1, start:document.getElementById('f2').value, end:document.getElementById('f3').value, done:false});
+      }else if(kind==='ent-toConsume'){
+        if(!val1) return;
+        state.entertainment[el.dataset.key].toConsume.push({id:uid(), title:val1, from:document.getElementById('f2').value, to:document.getElementById('f3').value, time:document.getElementById('f4').value});
+      }else if(kind==='ent-consumed'){
+        if(!val1) return;
+        const rating = Math.max(0, Math.min(5, parseInt(document.getElementById('f2').value)||0));
+        const comment = document.getElementById('f3').value.trim();
+        state.entertainment[el.dataset.key].consumed.unshift({id:uid(), title:val1, rating, comment, date:todayStr()});
+      }else if(kind==='finance-received'){
+        const amt = parseFloat(val1)||0;
+        if(amt<=0) return;
+        const note = (document.getElementById('f2')?.value||'').trim();
+        if(!state.finance.entriesToday) state.finance.entriesToday = [];
+        state.finance.have += amt; state.finance.receivedToday += amt;
+        state.finance.entriesToday.push({id:uid(), type:'received', amount:amt, note, time:nowHM()});
+      }else if(kind==='finance-paid'){
+        const amt = parseFloat(val1)||0;
+        if(amt<=0) return;
+        const note = (document.getElementById('f2')?.value||'').trim();
+        if(!state.finance.entriesToday) state.finance.entriesToday = [];
+        state.finance.have -= amt; state.finance.paidToday += amt;
+        state.finance.entriesToday.push({id:uid(), type:'paid', amount:amt, note, time:nowHM()});
+      }else if(kind==='finance-set'){
+        state.finance.have = parseFloat(val1)||0;
+      }else if(kind==='newCustomSection'){
+        if(!val1) return;
+        state.custom.push({id:uid(), name:val1, subsections:[]});
+      }else if(kind==='newCustomSub'){
+        if(!val1) return;
+        const c = state.custom.find(x=>x.id===el.dataset.cid);
+        c.subsections.push({id:uid(), name:val1, toConsume:[], consumed:[]});
+      }else if(kind==='custom-todo'){
+        if(!val1) return;
+        const c = state.custom.find(x=>x.id===el.dataset.cid);
+        const sub = c.subsections.find(x=>x.id===el.dataset.sid);
+        sub.toConsume.push({id:uid(), title:val1, from:document.getElementById('f2').value, to:document.getElementById('f3').value, time:document.getElementById('f4').value});
+      }else if(kind==='birthday'){
+        if(!val1) return;
+        const date = document.getElementById('f2').value;
+        if(!date) return;
+        const note = document.getElementById('f3').value.trim();
+        state.birthdays.push({id:uid(), name:val1, date, note});
+      }else if(kind==='note'){
+        if(!val1) return;
+        state.notes.unshift({id:uid(), text:val1, date:todayStr()});
+      }
+      await saveState();
+      const slotId = (kind==='birthday') ? 'formSlot-bday' : (kind==='note') ? 'formSlot-note' : 'formSlot';
+      const slotEl = document.getElementById(slotId);
+      if(slotEl) slotEl.innerHTML='';
+      render();
+    };
+  });
+}
+
+
+/* ===================== INIT ===================== */
+(async ()=>{
+  await loadState();
+  render();
+})();
+</script>
+
+<!-- Native reminders (only active inside the compiled Android app; harmless no-op in a browser) -->
+<script src="notifications.js"></script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
